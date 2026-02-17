@@ -180,17 +180,24 @@ function tahsinrahit_notion_sync_page()
     // Handle manual sync
     if (isset($_POST['sync_notion']) && check_admin_referer('notion_sync_action', 'notion_sync_nonce')) {
         tahsinrahit_clear_notion_cache();
+
+        // Force fresh fetch by adding a flag
+        $_GET['force_refresh'] = '1';
         $result = tahsinrahit_fetch_from_notion();
+        unset($_GET['force_refresh']);
 
         if (is_wp_error($result)) {
             $error = $result->get_error_message();
         } else {
             $message = 'Successfully synced ' . count($result) . ' places from Notion!';
+            // Update the cached data variable so preview shows immediately
+            $cached_data = $result;
         }
+    } else {
+        // Get current status only if not syncing
+        $cached_data = get_transient('notion_travel_places_cache');
     }
 
-    // Get current status
-    $cached_data = get_transient('notion_travel_places_cache');
     $is_configured = defined('NOTION_API_KEY') && defined('NOTION_DATABASE_ID');
 
     ?>
@@ -272,9 +279,9 @@ function tahsinrahit_notion_sync_page()
                     <li>Add these lines to your <code>wp-config.php</code>:</li>
                 </ol>
                 <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-        define('NOTION_API_KEY', 'secret_your_key_here');
-        define('NOTION_DATABASE_ID', 'your_database_id_here');
-                        </pre>
+                define('NOTION_API_KEY', 'secret_your_key_here');
+                define('NOTION_DATABASE_ID', 'your_database_id_here');
+                                </pre>
             </div>
         <?php else: ?>
             <div class="card" style="max-width: 800px; margin-top: 20px;">
