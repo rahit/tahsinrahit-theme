@@ -177,6 +177,12 @@ function tahsinrahit_notion_sync_page()
     $message = '';
     $error = '';
 
+    // Handle clear cache
+    if (isset($_POST['clear_cache']) && check_admin_referer('notion_clear_cache_action', 'notion_clear_cache_nonce')) {
+        tahsinrahit_clear_notion_cache();
+        $message = 'Cache cleared successfully!';
+    }
+
     // Handle manual sync
     if (isset($_POST['sync_notion']) && check_admin_referer('notion_sync_action', 'notion_sync_nonce')) {
         tahsinrahit_clear_notion_cache();
@@ -247,9 +253,11 @@ function tahsinrahit_notion_sync_page()
                     <th>Cache Status:</th>
                     <td>
                         <?php if ($cached_data !== false): ?>
-                            <span style="color: green;">✓ Cached (
-                                <?php echo count($cached_data); ?> places)
-                            </span>
+                            <?php if (is_wp_error($cached_data)): ?>
+                                <span style="color: red;">⚠ Error Cached: <?php echo esc_html($cached_data->get_error_message()); ?></span>
+                            <?php else: ?>
+                                <span style="color: green;">✓ Cached (<?php echo count($cached_data); ?> places)</span>
+                            <?php endif; ?>
                         <?php else: ?>
                             <span style="color: orange;">No cache</span>
                         <?php endif; ?>
@@ -279,23 +287,32 @@ function tahsinrahit_notion_sync_page()
                     <li>Add these lines to your <code>wp-config.php</code>:</li>
                 </ol>
                 <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-                define('NOTION_API_KEY', 'secret_your_key_here');
-                define('NOTION_DATABASE_ID', 'your_database_id_here');
-                                </pre>
+                                define('NOTION_API_KEY', 'secret_your_key_here');
+                                define('NOTION_DATABASE_ID', 'your_database_id_here');
+                                                </pre>
             </div>
         <?php else: ?>
             <div class="card" style="max-width: 800px; margin-top: 20px;">
                 <h2>Manual Sync</h2>
                 <p>Click the button below to manually sync your travel data from Notion.</p>
-                <form method="post">
-                    <?php wp_nonce_field('notion_sync_action', 'notion_sync_nonce'); ?>
-                    <p>
-                        <button type="submit" name="sync_notion" class="button button-primary button-large">
-                            🔄 Sync from Notion Now
-                        </button>
-                    </p>
+
+                <!-- Clear Cache Button -->
+                <form method="post" style="display: inline-block; margin-right: 10px;">
+                    <?php wp_nonce_field('notion_clear_cache_action', 'notion_clear_cache_nonce'); ?>
+                    <button type="submit" name="clear_cache" class="button button-secondary">
+                        🗑️ Clear Cache Only
+                    </button>
                 </form>
-                <p class="description">
+
+                <!-- Sync Button -->
+                <form method="post" style="display: inline-block;">
+                    <?php wp_nonce_field('notion_sync_action', 'notion_sync_nonce'); ?>
+                    <button type="submit" name="sync_notion" class="button button-primary button-large">
+                        🔄 Sync from Notion Now
+                    </button>
+                </form>
+
+                <p class="description" style="margin-top: 15px;">
                     Note: Data is automatically synced every hour. Manual sync is only needed if you want immediate updates.
                 </p>
             </div>
