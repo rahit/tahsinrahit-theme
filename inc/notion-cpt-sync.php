@@ -175,6 +175,9 @@ function tahsinrahit_sync_notion_to_posts()
         }
 
         if ($post_id && !is_wp_error($post_id)) {
+            // Clear object cache for this post to ensure fresh data
+            wp_cache_delete($post_id, 'post_meta');
+
             // Update meta fields
             update_post_meta($post_id, '_notion_id', $notion_id);
             update_post_meta($post_id, '_travel_country', $country);
@@ -182,7 +185,11 @@ function tahsinrahit_sync_notion_to_posts()
             update_post_meta($post_id, '_travel_type', $purpose);
             update_post_meta($post_id, '_travel_entry_date', $from_date);
             update_post_meta($post_id, '_travel_exit_date', $to_date);
+
+            // Force update photos by deleting old value first
+            delete_post_meta($post_id, '_travel_photos');
             update_post_meta($post_id, '_travel_photos', $photos); // Save photos array
+
             update_post_meta($post_id, '_synced_from_notion', current_time('mysql'));
         }
     }

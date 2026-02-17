@@ -70,6 +70,18 @@ get_header();
             <?php foreach ($places as $place): ?>
                 <div class="travel-item reveal">
                     <div class="travel-item__dot"></div>
+
+                    <?php if (!empty($place['photos'])): ?>
+                        <div class="travel-gallery">
+                            <?php foreach (array_slice($place['photos'], 0, 3) as $index => $photo_url): ?>
+                                <div class="travel-gallery__item" style="--i: <?php echo $index; ?>">
+                                    <img src="<?php echo esc_url($photo_url); ?>"
+                                        alt="Travel photo from <?php echo esc_attr($place['city']); ?>" loading="lazy">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="glass-panel travel-card">
                         <div class="travel-card__emoji" aria-hidden="true">
                             <?php echo esc_html($place['emoji']); ?>
@@ -87,17 +99,6 @@ get_header();
                             <?php echo esc_html($place['type']); ?>
                         </span>
                     </div>
-
-                    <?php if (!empty($place['photos'])): ?>
-                        <div class="travel-gallery">
-                            <?php foreach (array_slice($place['photos'], 0, 3) as $index => $photo_url): ?>
-                                <div class="travel-gallery__item" style="--i: <?php echo $index; ?>">
-                                    <img src="<?php echo esc_url($photo_url); ?>"
-                                        alt="Travel photo from <?php echo esc_attr($place['city']); ?>" loading="lazy">
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
