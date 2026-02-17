@@ -263,14 +263,11 @@ function tahsinrahit_notion_sync_page()
                             <label for="notion_api_key">Notion API Key</label>
                         </th>
                         <td>
-                            <input type="text" 
-                                   id="notion_api_key" 
-                                   name="notion_api_key" 
-                                   value="<?php echo esc_attr($api_key); ?>" 
-                                   class="regular-text" 
-                                   placeholder="secret_xxxxxxxxxxxxx">
+                            <input type="text" id="notion_api_key" name="notion_api_key"
+                                value="<?php echo esc_attr($api_key); ?>" class="regular-text"
+                                placeholder="secret_xxxxxxxxxxxxx">
                             <p class="description">
-                                Your Notion integration token. 
+                                Your Notion integration token.
                                 <a href="https://www.notion.so/my-integrations" target="_blank">Get your API key →</a>
                             </p>
                         </td>
@@ -280,12 +277,9 @@ function tahsinrahit_notion_sync_page()
                             <label for="notion_database_id">Database ID</label>
                         </th>
                         <td>
-                            <input type="text" 
-                                   id="notion_database_id" 
-                                   name="notion_database_id" 
-                                   value="<?php echo esc_attr($database_id); ?>" 
-                                   class="regular-text" 
-                                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                            <input type="text" id="notion_database_id" name="notion_database_id"
+                                value="<?php echo esc_attr($database_id); ?>" class="regular-text"
+                                placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
                             <p class="description">
                                 The ID of your Notion travel database (32 characters).
                             </p>
@@ -300,7 +294,9 @@ function tahsinrahit_notion_sync_page()
             </form>
         </div>
 
-        <div class="card" style="max-width: 800px;">\n            <h2>Configuration Status</h2>
+
+        <div class="card" style="max-width: 800px;">
+            <h2>Configuration Status</h2>
             <table class="form-table">
                 <tr>
                     <th>Notion API Key:</th>
@@ -367,9 +363,9 @@ function tahsinrahit_notion_sync_page()
                     <li>Add these lines to your <code>wp-config.php</code>:</li>
                 </ol>
                 <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-                                                define('NOTION_API_KEY', 'secret_your_key_here');
-                                                define('NOTION_DATABASE_ID', 'your_database_id_here');
-                                                                </pre>
+                                                        define('NOTION_API_KEY', 'secret_your_key_here');
+                                                        define('NOTION_DATABASE_ID', 'your_database_id_here');
+                                                                        </pre>
             </div>
         <?php else: ?>
             <div class="card" style="max-width: 800px; margin-top: 20px;">
