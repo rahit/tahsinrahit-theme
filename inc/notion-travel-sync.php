@@ -177,6 +177,17 @@ function tahsinrahit_notion_sync_page()
     $message = '';
     $error = '';
 
+    // Handle settings save
+    if (isset($_POST['save_settings']) && check_admin_referer('notion_settings_action', 'notion_settings_nonce')) {
+        $api_key = sanitize_text_field($_POST['notion_api_key']);
+        $database_id = sanitize_text_field($_POST['notion_database_id']);
+
+        update_option('notion_api_key', $api_key);
+        update_option('notion_database_id', $database_id);
+
+        $message = 'Settings saved successfully!';
+    }
+
     // Handle clear cache
     if (isset($_POST['clear_cache']) && check_admin_referer('notion_clear_cache_action', 'notion_clear_cache_nonce')) {
         tahsinrahit_clear_notion_cache();
@@ -207,7 +218,19 @@ function tahsinrahit_notion_sync_page()
     // Check old cache for diagnostic purposes
     $cached_data = get_transient('notion_travel_places_cache');
 
-    $is_configured = defined('NOTION_API_KEY') && defined('NOTION_DATABASE_ID');
+    // Get settings - check options first, then constants
+    $api_key = get_option('notion_api_key', '');
+    $database_id = get_option('notion_database_id', '');
+
+    // Fallback to constants if options are empty
+    if (empty($api_key) && defined('NOTION_API_KEY')) {
+        $api_key = NOTION_API_KEY;
+    }
+    if (empty($database_id) && defined('NOTION_DATABASE_ID')) {
+        $database_id = NOTION_DATABASE_ID;
+    }
+
+    $is_configured = !empty($api_key) && !empty($database_id);
 
     ?>
     <div class="wrap">
@@ -229,8 +252,55 @@ function tahsinrahit_notion_sync_page()
             </div>
         <?php endif; ?>
 
-        <div class="card" style="max-width: 800px;">
-            <h2>Configuration Status</h2>
+        <!-- Settings Form -->
+        <div class="card" style="max-width: 800px; margin-bottom: 20px;">
+            <h2>⚙️ Notion API Settings</h2>
+            <form method="post" action="">
+                <?php wp_nonce_field('notion_settings_action', 'notion_settings_nonce'); ?>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="notion_api_key">Notion API Key</label>
+                        </th>
+                        <td>
+                            <input type="text" 
+                                   id="notion_api_key" 
+                                   name="notion_api_key" 
+                                   value="<?php echo esc_attr($api_key); ?>" 
+                                   class="regular-text" 
+                                   placeholder="secret_xxxxxxxxxxxxx">
+                            <p class="description">
+                                Your Notion integration token. 
+                                <a href="https://www.notion.so/my-integrations" target="_blank">Get your API key →</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="notion_database_id">Database ID</label>
+                        </th>
+                        <td>
+                            <input type="text" 
+                                   id="notion_database_id" 
+                                   name="notion_database_id" 
+                                   value="<?php echo esc_attr($database_id); ?>" 
+                                   class="regular-text" 
+                                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                            <p class="description">
+                                The ID of your Notion travel database (32 characters).
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <p class="submit">
+                    <button type="submit" name="save_settings" class="button button-primary">
+                        💾 Save Settings
+                    </button>
+                </p>
+            </form>
+        </div>
+
+        <div class="card" style="max-width: 800px;">\n            <h2>Configuration Status</h2>
             <table class="form-table">
                 <tr>
                     <th>Notion API Key:</th>
@@ -297,9 +367,9 @@ function tahsinrahit_notion_sync_page()
                     <li>Add these lines to your <code>wp-config.php</code>:</li>
                 </ol>
                 <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-                                        define('NOTION_API_KEY', 'secret_your_key_here');
-                                        define('NOTION_DATABASE_ID', 'your_database_id_here');
-                                                        </pre>
+                                                define('NOTION_API_KEY', 'secret_your_key_here');
+                                                define('NOTION_DATABASE_ID', 'your_database_id_here');
+                                                                </pre>
             </div>
         <?php else: ?>
             <div class="card" style="max-width: 800px; margin-top: 20px;">

@@ -15,17 +15,28 @@ if (!defined('ABSPATH')) {
  */
 function tahsinrahit_sync_notion_to_posts()
 {
-    // Check if credentials are configured
-    if (!defined('NOTION_API_KEY') || !defined('NOTION_DATABASE_ID')) {
+    // Check if credentials are configured - check options first, then constants
+    $api_key = get_option('notion_api_key', '');
+    $database_id = get_option('notion_database_id', '');
+
+    // Fallback to constants if options are empty
+    if (empty($api_key) && defined('NOTION_API_KEY')) {
+        $api_key = NOTION_API_KEY;
+    }
+    if (empty($database_id) && defined('NOTION_DATABASE_ID')) {
+        $database_id = NOTION_DATABASE_ID;
+    }
+
+    if (empty($api_key) || empty($database_id)) {
         return new WP_Error('notion_config', 'Notion API credentials not configured');
     }
 
     // Fetch from Notion API
     $response = wp_remote_post(
-        'https://api.notion.com/v1/databases/' . NOTION_DATABASE_ID . '/query',
+        'https://api.notion.com/v1/databases/' . $database_id . '/query',
         array(
             'headers' => array(
-                'Authorization' => 'Bearer ' . NOTION_API_KEY,
+                'Authorization' => 'Bearer ' . $api_key,
                 'Notion-Version' => '2022-06-28',
                 'Content-Type' => 'application/json',
             ),
