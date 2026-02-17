@@ -204,6 +204,9 @@ function tahsinrahit_notion_sync_page()
     $post_count = wp_count_posts('travel_place');
     $published_count = $post_count->publish ?? 0;
 
+    // Check old cache for diagnostic purposes
+    $cached_data = get_transient('notion_travel_places_cache');
+
     $is_configured = defined('NOTION_API_KEY') && defined('NOTION_DATABASE_ID');
 
     ?>
@@ -260,7 +263,8 @@ function tahsinrahit_notion_sync_page()
                     <td>
                         <?php if ($cached_data !== false): ?>
                             <?php if (is_wp_error($cached_data)): ?>
-                                <span style="color: red;">⚠ Error Cached: <?php echo esc_html($cached_data->get_error_message()); ?></span>
+                                <span style="color: red;">⚠ Error Cached:
+                                    <?php echo esc_html($cached_data->get_error_message()); ?></span>
                             <?php else: ?>
                                 <span style="color: green;">✓ Cached (<?php echo count($cached_data); ?> places)</span>
                             <?php endif; ?>
@@ -293,9 +297,9 @@ function tahsinrahit_notion_sync_page()
                     <li>Add these lines to your <code>wp-config.php</code>:</li>
                 </ol>
                 <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-                                define('NOTION_API_KEY', 'secret_your_key_here');
-                                define('NOTION_DATABASE_ID', 'your_database_id_here');
-                                                </pre>
+                                        define('NOTION_API_KEY', 'secret_your_key_here');
+                                        define('NOTION_DATABASE_ID', 'your_database_id_here');
+                                                        </pre>
             </div>
         <?php else: ?>
             <div class="card" style="max-width: 800px; margin-top: 20px;">
