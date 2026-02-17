@@ -1,0 +1,177 @@
+<?php
+/**
+ * Notion to WordPress CPT Sync
+ * Syncs Notion database entries as WordPress posts
+ *
+ * @package TahsinRahit
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * Sync travel places from Notion to WordPress posts
+ */
+function tahsinrahit_sync_notion_to_posts()
+{
+    // Check if credentials are configured
+    if (!defined('NOTION_API_KEY') || !defined('NOTION_DATABASE_ID')) {
+        return new WP_Error('notion_config', 'Notion API credentials not configured');
+    }
+
+    // Fetch from Notion API
+    $response = wp_remote_post(
+        'https://api.notion.com/v1/databases/' . NOTION_DATABASE_ID . '/query',
+        array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . NOTION_API_KEY,
+                'Notion-Version' => '2022-06-28',
+                'Content-Type' => 'application/json',
+            ),
+            'body' => json_encode(array(
+                'sorts' => array(
+                    array(
+                        'property' => 'From Date',
+                        'direction' => 'descending'
+                    )
+                )
+            )),
+            'timeout' => 15
+        )
+    );
+
+    if (is_wp_error($response)) {
+        $error_msg = 'Notion API Error: ' . $response->get_error_message();
+        error_log($error_msg);
+        return new WP_Error('notion_api', $error_msg);
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $raw_body = wp_remote_retrieve_body($response);
+
+    if ($status_code !== 200) {
+        $error_msg = 'Notion API returned status ' . $status_code . ': ' . $raw_body;
+        error_log($error_msg);
+        return new WP_Error('notion_api', $error_msg);
+    }
+
+    $body = json_decode($raw_body, true);
+
+    if (!isset($body['results'])) {
+        error_log('Notion API: Invalid response structure');
+        return new WP_Error('notion_response', 'Invalid Notion API response');
+    }
+
+    $synced_count = 0;
+    $updated_count = 0;
+    $notion_ids = array();
+
+    foreach ($body['results'] as $page) {
+        $props = $page['properties'];
+        $notion_id = $page['id'];
+        $notion_ids[] = $notion_id;
+
+        // Extract data
+        $city = '';
+        if (isset($props['City']['title']) && !empty($props['City']['title'])) {
+            $city = $props['City']['title'][0]['plain_text'] ?? '';
+        }
+
+        $country = '';
+        if (isset($props['Country']['rich_text']) && !empty($props['Country']['rich_text'])) {
+            $country = $props['Country']['rich_text'][0]['plain_text'] ?? '';
+        }
+
+        $flag = '';
+        if (isset($props['Flag']['rich_text']) && !empty($props['Flag']['rich_text'])) {
+            $flag = $props['Flag']['rich_text'][0]['plain_text'] ?? '';
+        }
+
+        $purpose = '';
+        if (isset($props['Purpose']['select']['name'])) {
+            $purpose = $props['Purpose']['select']['name'];
+        }
+
+        $from_date = '';
+        if (isset($props['From Date']['date']['start'])) {
+            $from_date = $props['From Date']['date']['start'];
+        }
+
+        $to_date = '';
+        if (isset($props['To Date']['date']['start'])) {
+            $to_date = $props['To Date']['date']['start'];
+        }
+
+        // Skip if missing required fields
+        if (empty($city) || empty($country)) {
+            continue;
+        }
+
+        // Check if post already exists with this Notion ID
+        $existing = get_posts(array(
+            'post_type' => 'travel_place',
+            'meta_key' => '_notion_id',
+            'meta_value' => $notion_id,
+            'posts_per_page' => 1,
+            'post_status' => 'any'
+        ));
+
+        if (!empty($existing)) {
+            // Update existing post
+            $post_id = $existing[0]->ID;
+            wp_update_post(array(
+                'ID' => $post_id,
+                'post_title' => $city,
+                'post_status' => 'publish'
+            ));
+            $updated_count++;
+        } else {
+            // Create new post
+            $post_id = wp_insert_post(array(
+                'post_type' => 'travel_place',
+                'post_title' => $city,
+                'post_status' => 'publish',
+                'post_author' => 1
+            ));
+            $synced_count++;
+        }
+
+        if ($post_id && !is_wp_error($post_id)) {
+            // Update meta fields
+            update_post_meta($post_id, '_notion_id', $notion_id);
+            update_post_meta($post_id, '_travel_country', $country);
+            update_post_meta($post_id, '_travel_emoji', $flag);
+            update_post_meta($post_id, '_travel_type', $purpose);
+            update_post_meta($post_id, '_travel_entry_date', $from_date);
+            update_post_meta($post_id, '_travel_exit_date', $to_date);
+            update_post_meta($post_id, '_synced_from_notion', current_time('mysql'));
+        }
+    }
+
+    // Optional: Delete posts that no longer exist in Notion
+    $all_notion_posts = get_posts(array(
+        'post_type' => 'travel_place',
+        'meta_key' => '_notion_id',
+        'posts_per_page' => -1,
+        'fields' => 'ids',
+        'post_status' => 'any'
+    ));
+
+    $deleted_count = 0;
+    foreach ($all_notion_posts as $post_id) {
+        $notion_id = get_post_meta($post_id, '_notion_id', true);
+        if (!in_array($notion_id, $notion_ids)) {
+            // This post no longer exists in Notion, trash it
+            wp_trash_post($post_id);
+            $deleted_count++;
+        }
+    }
+
+    return array(
+        'synced' => $synced_count,
+        'updated' => $updated_count,
+        'deleted' => $deleted_count,
+        'total' => $synced_count + $updated_count
+    );
+}

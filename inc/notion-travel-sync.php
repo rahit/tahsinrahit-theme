@@ -185,24 +185,24 @@ function tahsinrahit_notion_sync_page()
 
     // Handle manual sync
     if (isset($_POST['sync_notion']) && check_admin_referer('notion_sync_action', 'notion_sync_nonce')) {
-        tahsinrahit_clear_notion_cache();
-
-        // Force fresh fetch by adding a flag
-        $_GET['force_refresh'] = '1';
-        $result = tahsinrahit_fetch_from_notion();
-        unset($_GET['force_refresh']);
+        $result = tahsinrahit_sync_notion_to_posts();
 
         if (is_wp_error($result)) {
             $error = $result->get_error_message();
         } else {
-            $message = 'Successfully synced ' . count($result) . ' places from Notion!';
-            // Update the cached data variable so preview shows immediately
-            $cached_data = $result;
+            $message = sprintf(
+                'Successfully synced from Notion! Created: %d, Updated: %d, Deleted: %d, Total: %d places',
+                $result['synced'],
+                $result['updated'],
+                $result['deleted'],
+                $result['total']
+            );
         }
-    } else {
-        // Get current status only if not syncing
-        $cached_data = get_transient('notion_travel_places_cache');
     }
+
+    // Get current status - count WordPress posts
+    $post_count = wp_count_posts('travel_place');
+    $published_count = $post_count->publish ?? 0;
 
     $is_configured = defined('NOTION_API_KEY') && defined('NOTION_DATABASE_ID');
 
@@ -250,7 +250,13 @@ function tahsinrahit_notion_sync_page()
                     </td>
                 </tr>
                 <tr>
-                    <th>Cache Status:</th>
+                    <th>WordPress Posts:</th>
+                    <td>
+                        <span style="color: green;">✓ <?php echo $published_count; ?> published places</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Old Cache Status:</th>
                     <td>
                         <?php if ($cached_data !== false): ?>
                             <?php if (is_wp_error($cached_data)): ?>
