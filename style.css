@@ -1,0 +1,222 @@
+/*
+Theme Name: Tahsin Rahit Portfolio
+Theme URI: https://www.tahsinrahit.com
+Author: K.M. Tahsin Hassan Rahit
+Author URI: https://www.tahsinrahit.com
+Description: A dark-themed academic portfolio WordPress theme featuring a comprehensive CV homepage, about, blog, and travel pages. Built with security-first architecture and modern animations.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 8.0
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: tahsinrahit
+Tags: portfolio, dark, one-column, custom-menu, featured-images, theme-options, translation-ready
+*/
+
+/* ==========================================================================
+   Design System — CSS Custom Properties
+   ========================================================================== */
+
+:root {
+    /* --- Color Palette --- */
+    --color-bg-primary: #0A1120;
+    --color-bg-secondary: #0F1A2E;
+    --color-bg-tertiary: #1E293B;
+    --color-bg-card: rgba(30, 41, 59, 0.4);
+    --color-bg-card-hover: rgba(30, 41, 59, 0.6);
+
+    --color-accent: #00E5FF;
+    --color-accent-secondary: #3B82F6;
+    --color-accent-gradient: linear-gradient(135deg, #00E5FF, #3B82F6);
+
+    --color-text-primary: #F8FAFC;
+    --color-text-secondary: #CBD5E1;
+    --color-text-muted: #64748B;
+
+    --color-border: rgba(100, 116, 139, 0.2);
+    --color-border-hover: rgba(0, 229, 255, 0.5);
+
+    /* --- Typography --- */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+    --text-6xl: 3.75rem;
+
+    --leading-tight: 1.25;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+
+    /* --- Spacing --- */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    /* --- Borders & Radius --- */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.625rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* --- Shadows --- */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
+    --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.4);
+    --shadow-accent: 0 0 20px rgba(0, 229, 255, 0.15);
+
+    /* --- Transitions --- */
+    --transition-fast: 150ms ease;
+    --transition-base: 300ms ease;
+    --transition-slow: 500ms ease;
+
+    /* --- Layout --- */
+    --container-max: 1280px;
+    --nav-height: 64px;
+
+    /* --- Z-Index --- */
+    --z-bg: 0;
+    --z-content: 10;
+    --z-sticky: 20;
+    --z-nav: 50;
+    --z-overlay: 100;
+    --z-modal: 200;
+}
+
+/* --- Light Mode Overrides --- */
+body.light-mode {
+    --color-bg-primary: #F8FAFC;
+    --color-bg-secondary: #F1F5F9;
+    --color-bg-tertiary: #E2E8F0;
+    --color-bg-card: rgba(241, 245, 249, 0.8);
+    --color-bg-card-hover: rgba(226, 232, 240, 0.8);
+
+    --color-accent: #0891B2;
+    --color-accent-secondary: #2563EB;
+    --color-accent-gradient: linear-gradient(135deg, #0891B2, #2563EB);
+
+    --color-text-primary: #0F172A;
+    --color-text-secondary: #334155;
+    --color-text-muted: #94A3B8;
+
+    --color-border: rgba(148, 163, 184, 0.3);
+    --color-border-hover: rgba(8, 145, 178, 0.5);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+    --shadow-accent: 0 0 20px rgba(8, 145, 178, 0.1);
+}
+
+/* ==========================================================================
+   Base Reset & Typography
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    font-size: var(--text-base);
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    position: relative;
+}
+
+::selection {
+    background-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-text-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+    font-weight: 700;
+}
+
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+
+code, pre {
+    font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   Layout Utilities
+   ========================================================================== */
+
+.container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
