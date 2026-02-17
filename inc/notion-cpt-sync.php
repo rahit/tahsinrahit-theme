@@ -72,15 +72,17 @@ function tahsinrahit_sync_notion_to_posts()
         $notion_id = $page['id'];
         $notion_ids[] = $notion_id;
 
-        // Extract data
+        // Extract data - CORRECTED based on actual API structure
+        // City is rich_text type
         $city = '';
-        if (isset($props['City']['title']) && !empty($props['City']['title'])) {
-            $city = $props['City']['title'][0]['plain_text'] ?? '';
+        if (isset($props['City']['rich_text']) && !empty($props['City']['rich_text'])) {
+            $city = $props['City']['rich_text'][0]['plain_text'] ?? '';
         }
 
+        // Country is title type
         $country = '';
-        if (isset($props['Country']['rich_text']) && !empty($props['Country']['rich_text'])) {
-            $country = $props['Country']['rich_text'][0]['plain_text'] ?? '';
+        if (isset($props['Country']['title']) && !empty($props['Country']['title'])) {
+            $country = $props['Country']['title'][0]['plain_text'] ?? '';
         }
 
         $flag = '';
