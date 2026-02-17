@@ -116,6 +116,30 @@ function tahsinrahit_sync_notion_to_posts()
             $to_date = $props['To Date']['date']['start'];
         }
 
+        // Photos (URL field - supports comma separated values)
+        $photos = array();
+        $photos_str = '';
+
+        // Check for 'url' type (standard URL field)
+        if (isset($props['Photos']['url']) && !empty($props['Photos']['url'])) {
+            $photos_str = $props['Photos']['url'];
+        }
+        // Fallback: Check for 'rich_text' type (Text field) just in case
+        elseif (isset($props['Photos']['rich_text']) && !empty($props['Photos']['rich_text'])) {
+            $photos_str = $props['Photos']['rich_text'][0]['plain_text'] ?? '';
+        }
+
+        if (!empty($photos_str)) {
+            // Split by comma, trim whitespace
+            $urls = explode(',', $photos_str);
+            foreach ($urls as $url) {
+                $url = trim($url);
+                if (!empty($url)) {
+                    $photos[] = $url;
+                }
+            }
+        }
+
         // Skip if missing required fields
         if (empty($city) || empty($country)) {
             continue;
@@ -158,6 +182,7 @@ function tahsinrahit_sync_notion_to_posts()
             update_post_meta($post_id, '_travel_type', $purpose);
             update_post_meta($post_id, '_travel_entry_date', $from_date);
             update_post_meta($post_id, '_travel_exit_date', $to_date);
+            update_post_meta($post_id, '_travel_photos', $photos); // Save photos array
             update_post_meta($post_id, '_synced_from_notion', current_time('mysql'));
         }
     }

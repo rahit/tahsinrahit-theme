@@ -10,16 +10,16 @@ if (!defined('ABSPATH')) {
 }
 
 $places = array(
-    array('emoji' => '🇨🇦', 'city' => 'Calgary', 'country' => 'Canada', 'year' => '2019 — Present', 'type' => 'Home'),
-    array('emoji' => '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'city' => 'Glasgow', 'country' => 'Scotland', 'year' => '2023', 'type' => 'Conference'),
-    array('emoji' => '🇺🇸', 'city' => 'Los Angeles', 'country' => 'USA', 'year' => '2022', 'type' => 'Conference'),
-    array('emoji' => '🇸🇬', 'city' => 'Singapore', 'country' => 'Singapore', 'year' => '2018', 'type' => 'Conference'),
-    array('emoji' => '🇹🇭', 'city' => 'Bangkok', 'country' => 'Thailand', 'year' => '2016 — 2017', 'type' => 'Work'),
-    array('emoji' => '🇧🇩', 'city' => 'Dhaka', 'country' => 'Bangladesh', 'year' => 'Hometown', 'type' => 'Origin'),
-    array('emoji' => '🇮🇳', 'city' => 'Kolkata', 'country' => 'India', 'year' => '2016', 'type' => 'Travel'),
-    array('emoji' => '🇲🇾', 'city' => 'Kuala Lumpur', 'country' => 'Malaysia', 'year' => '2017', 'type' => 'Travel'),
-    array('emoji' => '🇦🇪', 'city' => 'Dubai', 'country' => 'UAE', 'year' => '2019', 'type' => 'Transit'),
-    array('emoji' => '🇺🇸', 'city' => 'Houston', 'country' => 'USA', 'year' => '2019', 'type' => 'Conference'),
+    array('emoji' => '🇨🇦', 'city' => 'Calgary', 'country' => 'Canada', 'year' => '2019 — Present', 'type' => 'Home', 'photos' => array('https://images.unsplash.com/photo-1597200459346-6ad86f2b48a3?w=400&q=80', 'https://images.unsplash.com/photo-1629167123964-b5a93910c662?w=400&q=80')),
+    array('emoji' => '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'city' => 'Glasgow', 'country' => 'Scotland', 'year' => '2023', 'type' => 'Conference', 'photos' => array('https://images.unsplash.com/photo-1579707252277-3e12c0199343?w=400&q=80')),
+    array('emoji' => '🇺🇸', 'city' => 'Los Angeles', 'country' => 'USA', 'year' => '2022', 'type' => 'Conference', 'photos' => array()),
+    array('emoji' => '🇸🇬', 'city' => 'Singapore', 'country' => 'Singapore', 'year' => '2018', 'type' => 'Conference', 'photos' => array('https://images.unsplash.com/photo-1525625293386-3f8f99389e14?w=400&q=80', 'https://images.unsplash.com/photo-1565967511849-76a60a516170?w=400&q=80')),
+    array('emoji' => '🇹🇭', 'city' => 'Bangkok', 'country' => 'Thailand', 'year' => '2016 — 2017', 'type' => 'Work', 'photos' => array('https://images.unsplash.com/photo-1582260656608-25175965dd36?w=400&q=80')),
+    array('emoji' => '🇧🇩', 'city' => 'Dhaka', 'country' => 'Bangladesh', 'year' => 'Hometown', 'type' => 'Origin', 'photos' => array()),
+    array('emoji' => '🇮🇳', 'city' => 'Kolkata', 'country' => 'India', 'year' => '2016', 'type' => 'Travel', 'photos' => array()),
+    array('emoji' => '🇲🇾', 'city' => 'Kuala Lumpur', 'country' => 'Malaysia', 'year' => '2017', 'type' => 'Travel', 'photos' => array('https://images.unsplash.com/photo-1574087834778-9e19dce9b2b5?w=400&q=80')),
+    array('emoji' => '🇦🇪', 'city' => 'Dubai', 'country' => 'UAE', 'year' => '2019', 'type' => 'Transit', 'photos' => array()),
+    array('emoji' => '🇺🇸', 'city' => 'Houston', 'country' => 'USA', 'year' => '2019', 'type' => 'Conference', 'photos' => array()),
 );
 
 // Fetch from WordPress Custom Post Type (synced from Notion)
@@ -43,6 +43,7 @@ if ($travel_query->have_posts()) {
             'country' => get_post_meta(get_the_ID(), '_travel_country', true),
             'year' => tahsinrahit_format_travel_dates($entry_date, $exit_date),
             'type' => get_post_meta(get_the_ID(), '_travel_type', true),
+            'photos' => get_post_meta(get_the_ID(), '_travel_photos', true) ?: array(),
         );
     }
     wp_reset_postdata();
@@ -86,6 +87,17 @@ get_header();
                             <?php echo esc_html($place['type']); ?>
                         </span>
                     </div>
+
+                    <?php if (!empty($place['photos'])): ?>
+                        <div class="travel-gallery">
+                            <?php foreach (array_slice($place['photos'], 0, 3) as $index => $photo_url): ?>
+                                <div class="travel-gallery__item" style="--i: <?php echo $index; ?>">
+                                    <img src="<?php echo esc_url($photo_url); ?>"
+                                        alt="Travel photo from <?php echo esc_attr($place['city']); ?>" loading="lazy">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>

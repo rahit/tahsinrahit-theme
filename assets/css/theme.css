@@ -1322,6 +1322,69 @@
     color: #A78BFA;
 }
 
+/* Travel Gallery */
+.travel-gallery {
+    position: absolute;
+    top: 20px;
+    width: 200px;
+    height: 150px;
+    z-index: 1;
+}
+
+/* Odd items: Gallery on Left (since content is on Right) */
+.travel-item .travel-gallery {
+    left: 0;
+    right: auto;
+    transform: translateX(-120%);
+}
+
+/* Even items: Gallery on Right (since content is on Left) */
+.travel-item:nth-child(even) .travel-gallery {
+    left: auto;
+    right: 0;
+    transform: translateX(120%);
+}
+
+.travel-gallery__item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 4px solid #fff;
+    box-shadow: var(--shadow-lg);
+    background: var(--color-bg-card);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform-origin: center bottom;
+
+    /* Stack effect using CSS var --i from HTML */
+    transform: rotate(calc(var(--i) * 3deg - 3deg)) translateY(calc(var(--i) * 2px));
+    z-index: calc(3 - var(--i));
+}
+
+.travel-gallery__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Hover Effects */
+.travel-gallery:hover .travel-gallery__item {
+    /* Fan out */
+    transform: rotate(calc(var(--i) * 8deg - 8deg)) translate(calc(var(--i) * 60px - 60px), calc(var(--i) * 10px));
+    box-shadow: var(--shadow-xl);
+}
+
+.travel-gallery:hover .travel-gallery__item:hover {
+    transform: scale(1.1) rotate(0) translate(0, -10px);
+    z-index: 10;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    border-color: var(--color-accent);
+}
+
 /* Travel responsive — stack on mobile */
 @media (max-width: 768px) {
     .travel-timeline::before {
@@ -1334,7 +1397,26 @@
         margin-left: 0;
         padding-right: 0;
         padding-left: calc(20px + var(--space-8));
+        padding-left: calc(20px + var(--space-8));
         justify-content: flex-start;
+        /* Ensure stacking context for gallery on mobile */
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Adjust gallery for mobile */
+    .travel-item .travel-gallery,
+    .travel-item:nth-child(even) .travel-gallery {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+        height: 200px;
+        top: auto;
+        left: auto;
+        right: auto;
+        transform: none;
+        margin-top: var(--space-6);
+        margin-bottom: var(--space-4);
     }
 
     .travel-item__dot,
