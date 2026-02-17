@@ -134,20 +134,29 @@ function tahsinrahit_clear_notion_cache()
 }
 
 /**
- * Schedule automatic refresh
+ * Schedule automatic refresh - every 7 days
  */
 function tahsinrahit_schedule_notion_sync()
 {
-    if (!wp_next_scheduled('tahsinrahit_refresh_notion_travel')) {
-        wp_schedule_event(time(), 'hourly', 'tahsinrahit_refresh_notion_travel');
+    $hook = 'tahsinrahit_refresh_notion_travel';
+    
+    // Clear any existing schedule (in case we're changing from hourly to weekly)
+    $timestamp = wp_next_scheduled($hook);
+    if ($timestamp) {
+        wp_unschedule_event($timestamp, $hook);
+    }
+    
+    // Schedule for weekly (7 days)
+    if (!wp_next_scheduled($hook)) {
+        wp_schedule_event(time(), 'weekly', $hook);
     }
 }
 add_action('init', 'tahsinrahit_schedule_notion_sync');
 
 /**
- * Hourly refresh hook
+ * Weekly refresh hook - sync from Notion to WordPress posts
  */
-add_action('tahsinrahit_refresh_notion_travel', 'tahsinrahit_clear_notion_cache');
+add_action('tahsinrahit_refresh_notion_travel', 'tahsinrahit_sync_notion_to_posts');
 
 /**
  * Add admin menu for manual sync
@@ -343,7 +352,7 @@ function tahsinrahit_notion_sync_page()
                     <th>Auto-sync:</th>
                     <td>
                         <?php if (wp_next_scheduled('tahsinrahit_refresh_notion_travel')): ?>
-                            <span style="color: green;">✓ Enabled (hourly)</span>
+                            <span style="color: green;">✓ Enabled (weekly - every 7 days)</span>
                         <?php else: ?>
                             <span style="color: orange;">Not scheduled</span>
                         <?php endif; ?>
@@ -389,7 +398,7 @@ function tahsinrahit_notion_sync_page()
                 </form>
 
                 <p class="description" style="margin-top: 15px;">
-                    Note: Data is automatically synced every hour. Manual sync is only needed if you want immediate updates.
+                    Note: Data is automatically synced every 7 days. Manual sync is only needed if you want immediate updates.
                 </p>
             </div>
 
