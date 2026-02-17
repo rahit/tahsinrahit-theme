@@ -1331,20 +1331,20 @@
     z-index: 1;
 }
 
-/* Odd items: Card on Right, Gallery on Left (opposite side of timeline) */
+/* Odd items: Card on Right side of timeline, Gallery also on Right (outer edge) */
 .travel-item .travel-gallery {
-    /* Position on the far left of the .travel-item container */
-    left: var(--space-4);
-    right: auto;
-    transform: none;
+    right: 0;
+    left: auto;
+    /* Position just outside the card, to the right */
+    transform: translateX(calc(100% + var(--space-4)));
 }
 
-/* Even items: Card on Left, Gallery on Right (opposite side of timeline) */
+/* Even items: Card on Left side of timeline, Gallery also on Left (outer edge) */
 .travel-item:nth-child(even) .travel-gallery {
-    /* Position on the far right of the .travel-item container */
-    left: auto;
-    right: var(--space-4);
-    transform: none;
+    left: 0;
+    right: auto;
+    /* Position just outside the card, to the left */
+    transform: translateX(calc(-100% - var(--space-4)));
 }
 
 .travel-gallery__item {
