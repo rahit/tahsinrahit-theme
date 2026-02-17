@@ -22,27 +22,46 @@ $places = array(
     array('emoji' => '🇺🇸', 'city' => 'Houston', 'country' => 'USA', 'year' => '2019', 'type' => 'Conference'),
 );
 
-// Fetch from Custom Post Type
-$travel_query = new WP_Query(array(
-    'post_type' => 'travel_place',
-    'posts_per_page' => -1,
-    'orderby' => 'menu_order',
-    'order' => 'ASC',
-));
-
-if ($travel_query->have_posts()) {
-    $places = array(); // Override defaults if we have dynamic content
-    while ($travel_query->have_posts()) {
-        $travel_query->the_post();
+// Priority 1: Try to fetch from Notion
+$notion_places = tahsinrahit_fetch_from_notion();
+if (!is_wp_error($notion_places) && !empty($notion_places)) {
+    // Use Notion data
+    $places = array();
+    foreach ($notion_places as $place) {
         $places[] = array(
-            'emoji' => get_post_meta(get_the_ID(), '_travel_emoji', true),
-            'city' => get_the_title(),
-            'country' => get_post_meta(get_the_ID(), '_travel_country', true),
-            'year' => get_post_meta(get_the_ID(), '_travel_year', true),
-            'type' => get_post_meta(get_the_ID(), '_travel_type', true),
+            'emoji' => $place['emoji'],
+            'city' => $place['city'],
+            'country' => $place['country'],
+            'year' => tahsinrahit_format_travel_dates($place['entry_date'], $place['exit_date']),
+            'type' => $place['type'],
         );
     }
-    wp_reset_postdata();
+} else {
+    // Priority 2: Fetch from WordPress Custom Post Type
+    $travel_query = new WP_Query(array(
+        'post_type' => 'travel_place',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC',
+    ));
+
+    if ($travel_query->have_posts()) {
+        $places = array(); // Override defaults if we have dynamic content
+        while ($travel_query->have_posts()) {
+            $travel_query->the_post();
+            $entry_date = get_post_meta(get_the_ID(), '_travel_entry_date', true);
+            $exit_date = get_post_meta(get_the_ID(), '_travel_exit_date', true);
+            $places[] = array(
+                'emoji' => get_post_meta(get_the_ID(), '_travel_emoji', true),
+                'city' => get_the_title(),
+                'country' => get_post_meta(get_the_ID(), '_travel_country', true),
+                'year' => tahsinrahit_format_travel_dates($entry_date, $exit_date),
+                'type' => get_post_meta(get_the_ID(), '_travel_type', true),
+            );
+        }
+        wp_reset_postdata();
+    }
+    // Priority 3: Use hardcoded fallback data (already defined above)
 }
 
 get_header();

@@ -23,6 +23,7 @@ require_once TAHSINRAHIT_DIR . '/inc/security.php';
 require_once TAHSINRAHIT_DIR . '/inc/customizer.php';
 require_once TAHSINRAHIT_DIR . '/inc/template-tags.php';
 require_once TAHSINRAHIT_DIR . '/inc/cpt-travel.php';
+require_once TAHSINRAHIT_DIR . '/inc/notion-travel-sync.php';
 
 /* ---------------------------------------------------------------
  * Theme Setup

@@ -87,7 +87,8 @@ function tahsinrahit_travel_meta_box_callback($post)
     wp_nonce_field('tahsinrahit_travel_save_meta_box_data', 'tahsinrahit_travel_meta_box_nonce');
 
     $country = get_post_meta($post->ID, '_travel_country', true);
-    $year = get_post_meta($post->ID, '_travel_year', true);
+    $entry_date = get_post_meta($post->ID, '_travel_entry_date', true);
+    $exit_date = get_post_meta($post->ID, '_travel_exit_date', true);
     $type = get_post_meta($post->ID, '_travel_type', true);
     $emoji = get_post_meta($post->ID, '_travel_emoji', true);
 
@@ -102,11 +103,19 @@ function tahsinrahit_travel_meta_box_callback($post)
         <input type="text" id="travel_country" name="travel_country" value="<?php echo esc_attr($country); ?>"
             class="widefat" placeholder="e.g. Canada">
     </p>
-    <p>
-        <label for="travel_year"><strong>Year / Duration:</strong></label><br>
-        <input type="text" id="travel_year" name="travel_year" value="<?php echo esc_attr($year); ?>" class="widefat"
-            placeholder="e.g. 2024 or 2019 — Present">
-    </p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <p>
+            <label for="travel_entry_date"><strong>Entry Date:</strong></label><br>
+            <input type="date" id="travel_entry_date" name="travel_entry_date" value="<?php echo esc_attr($entry_date); ?>"
+                class="widefat">
+        </p>
+        <p>
+            <label for="travel_exit_date"><strong>Exit Date:</strong></label><br>
+            <input type="date" id="travel_exit_date" name="travel_exit_date" value="<?php echo esc_attr($exit_date); ?>"
+                class="widefat">
+            <small style="color: #666;">Leave empty for "Present"</small>
+        </p>
+    </div>
     <p>
         <label for="travel_type"><strong>Type:</strong></label><br>
         <select id="travel_type" name="travel_type" class="widefat">
@@ -140,8 +149,11 @@ function tahsinrahit_travel_save_meta_box_data($post_id)
     if (isset($_POST['travel_country'])) {
         update_post_meta($post_id, '_travel_country', sanitize_text_field($_POST['travel_country']));
     }
-    if (isset($_POST['travel_year'])) {
-        update_post_meta($post_id, '_travel_year', sanitize_text_field($_POST['travel_year']));
+    if (isset($_POST['travel_entry_date'])) {
+        update_post_meta($post_id, '_travel_entry_date', sanitize_text_field($_POST['travel_entry_date']));
+    }
+    if (isset($_POST['travel_exit_date'])) {
+        update_post_meta($post_id, '_travel_exit_date', sanitize_text_field($_POST['travel_exit_date']));
     }
     if (isset($_POST['travel_type'])) {
         update_post_meta($post_id, '_travel_type', sanitize_text_field($_POST['travel_type']));
@@ -151,3 +163,33 @@ function tahsinrahit_travel_save_meta_box_data($post_id)
     }
 }
 add_action('save_post', 'tahsinrahit_travel_save_meta_box_data');
+
+// Helper function to format date range
+function tahsinrahit_format_travel_dates($entry_date, $exit_date = '')
+{
+    if (empty($entry_date)) {
+        return '';
+    }
+
+    $entry = new DateTime($entry_date);
+
+    // If no exit date, it's ongoing
+    if (empty($exit_date)) {
+        return $entry->format('M Y') . ' — Present';
+    }
+
+    $exit = new DateTime($exit_date);
+
+    // Same month and year - show as single month
+    if ($entry->format('Y-m') === $exit->format('Y-m')) {
+        return $entry->format('M Y');
+    }
+
+    // Same year - show abbreviated
+    if ($entry->format('Y') === $exit->format('Y')) {
+        return $entry->format('M') . ' — ' . $exit->format('M Y');
+    }
+
+    // Different years - show full range
+    return $entry->format('M Y') . ' — ' . $exit->format('M Y');
+}
