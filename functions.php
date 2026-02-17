@@ -25,7 +25,7 @@ require_once TAHSINRAHIT_DIR . '/inc/template-tags.php';
 require_once TAHSINRAHIT_DIR . '/inc/cpt-travel.php';
 require_once TAHSINRAHIT_DIR . '/inc/notion-travel-sync.php';
 require_once TAHSINRAHIT_DIR . '/inc/notion-cpt-sync.php'; // New: Sync to WordPress posts
-require_once TAHSINRAHIT_DIR . '/notion-debug.php'; // Temporary debug tool
+
 
 /* ---------------------------------------------------------------
  * Theme Setup
