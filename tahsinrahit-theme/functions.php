@@ -22,6 +22,7 @@ define('TAHSINRAHIT_URI', get_template_directory_uri());
 require_once TAHSINRAHIT_DIR . '/inc/security.php';
 require_once TAHSINRAHIT_DIR . '/inc/customizer.php';
 require_once TAHSINRAHIT_DIR . '/inc/template-tags.php';
+require_once TAHSINRAHIT_DIR . '/inc/cpt-travel.php';
 
 /* ---------------------------------------------------------------
  * Theme Setup

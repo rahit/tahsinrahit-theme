@@ -22,6 +22,29 @@ $places = array(
     array('emoji' => '🇺🇸', 'city' => 'Houston', 'country' => 'USA', 'year' => '2019', 'type' => 'Conference'),
 );
 
+// Fetch from Custom Post Type
+$travel_query = new WP_Query(array(
+    'post_type' => 'travel_place',
+    'posts_per_page' => -1,
+    'orderby' => 'menu_order',
+    'order' => 'ASC',
+));
+
+if ($travel_query->have_posts()) {
+    $places = array(); // Override defaults if we have dynamic content
+    while ($travel_query->have_posts()) {
+        $travel_query->the_post();
+        $places[] = array(
+            'emoji' => get_post_meta(get_the_ID(), '_travel_emoji', true),
+            'city' => get_the_title(),
+            'country' => get_post_meta(get_the_ID(), '_travel_country', true),
+            'year' => get_post_meta(get_the_ID(), '_travel_year', true),
+            'type' => get_post_meta(get_the_ID(), '_travel_type', true),
+        );
+    }
+    wp_reset_postdata();
+}
+
 get_header();
 ?>
 
